@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Studio Photo — Cabinet Chikhaoui</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:      #1c1218;
+  --ink-soft: #7a5a68;
+  --rose:     #d4849f;
+  --rose-deep:#b85c7a;
+  --rose-pale:#fff0f5;
+  --rose-mid: #f5d5e1;
+  --cream:    #fdf8f9;
+  --white:    #ffffff;
+  --border:   rgba(180,100,130,0.18);
+  --shadow:   0 8px 40px rgba(184,92,122,0.12);
+  --r:        14px;
+  --r-sm:     8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Jost', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+  font-weight: 300;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: .5;
+}
+
+/* HEADER */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(255,255,255,0.93);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 13px 24px;
+  display: flex; align-items: center; gap: 13px;
+}
+.header-copy h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1rem; font-weight: 700;
+  letter-spacing: .02em; line-height: 1.2; color: var(--ink);
+}
+.header-copy p {
+  font-size: .62rem; font-weight: 300;
+  color: var(--ink-soft); letter-spacing: .07em;
+  text-transform: uppercase; margin-top: 1px;
+}
+
+/* PROGRESS */
+.progress {
+  display: flex; align-items: center; justify-content: center;
+  padding: 14px 20px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 62px; z-index: 100;
+}
+.p-step {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 14px; border-radius: 100px;
+  cursor: pointer; transition: background .2s; user-select: none;
+}
+.p-step:hover { background: var(--rose-pale); }
+.p-step.active { background: var(--rose-mid); }
+.p-dot {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1.5px solid var(--border); background: var(--cream);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 500; color: var(--ink-soft);
+  transition: all .25s; flex-shrink: 0;
+}
+.p-step.active .p-dot, .p-step.done .p-dot {
+  background: var(--rose-deep); border-color: var(--rose-deep); color: #fff;
+}
+.p-label { font-size: .75rem; font-weight: 400; color: var(--ink-soft); white-space: nowrap; }
+.p-step.active .p-label { color: var(--rose-deep); font-weight: 500; }
+.p-arrow { color: var(--rose-mid); padding: 0 2px; font-size: .9rem; }
+
+/* MAIN */
+main { max-width: 600px; margin: 0 auto; padding: 28px 18px 100px; position: relative; z-index: 1; }
+
+/* PANEL */
+.panel { display: none; }
+.panel.active { display: block; animation: rise .35s cubic-bezier(.22,1,.36,1) both; }
+@keyframes rise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+.panel-head { margin-bottom: 20px; }
+.panel-head h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem; font-weight: 400;
+  line-height: 1.1; color: var(--ink);
+}
+.panel-head h2 em { font-style: italic; color: var(--rose-deep); }
+.panel-head p { font-size: .78rem; color: var(--ink-soft); margin-top: 4px; font-weight: 300; }
+
+/* UPLOAD */
+.upload-zone {
+  border: 2px dashed var(--rose); border-radius: var(--r);
+  background: var(--white); padding: 44px 20px;
+  text-align: center; cursor: pointer; transition: all .25s;
+  position: relative; overflow: hidden;
+}
+.upload-zone::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse at 50% 80%, rgba(212,132,159,.06) 0%, transparent 70%);
+}
+.upload-zone:hover, .upload-zone.drag { border-color: var(--rose-deep); background: var(--rose-pale); }
+.upload-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.upload-icon { margin-bottom: 14px; }
+.upload-zone strong { display:block; font-size:.9rem; font-weight:500; color:var(--rose-deep); margin-bottom:3px; }
+.upload-zone p { font-size:.78rem; color:var(--ink-soft); font-weight:300; }
+
+/* PREVIEW */
+.img-wrap {
+  display:none; border-radius:var(--r); overflow:hidden;
+  border:1px solid var(--border); background:#f8eef2; position:relative;
+}
+.img-wrap img, .img-wrap canvas { width:100%; display:block; max-height:420px; object-fit:contain; background:#f8eef2; }
+.img-actions { position:absolute; top:10px; right:10px; display:flex; gap:6px; }
+.icon-btn {
+  width:32px; height:32px; border-radius:50%;
+  background:rgba(255,255,255,.88); backdrop-filter:blur(6px);
+  border:1px solid rgba(180,100,130,.2);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:.8rem; color:var(--ink-soft); transition:all .2s;
+}
+.icon-btn:hover { background:var(--rose-mid); color:var(--rose-deep); }
+
+/* TOOL BAR */
+.tool-bar { display:none; margin-top:14px; background:var(--white); border:1px solid var(--border); border-radius:var(--r); padding:18px 20px; }
+.tool-bar.on { display:block; }
+.tool-section { margin-bottom:20px; }
+.tool-section:last-child { margin-bottom:0; }
+.tl { font-size:.65rem; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+
+.sl-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.sl-row label { font-size:.75rem; width:82px; flex-shrink:0; color:var(--ink); }
+.sl-row input[type=range] { flex:1; accent-color:var(--rose-deep); cursor:pointer; }
+.sl-val { font-size:.72rem; color:var(--rose-deep); width:36px; text-align:right; flex-shrink:0; font-weight:500; }
+
+.filter-grid { display:flex; flex-wrap:wrap; gap:7px; }
+.f-btn {
+  padding:5px 13px; border-radius:100px; border:1.5px solid var(--border);
+  background:var(--cream); font-size:.75rem; color:var(--ink-soft);
+  cursor:pointer; font-family:'Jost',sans-serif; transition:all .2s;
+}
+.f-btn:hover { border-color:var(--rose); color:var(--rose-deep); }
+.f-btn.on { background:var(--rose-deep); border-color:var(--rose-deep); color:#fff; }
+
+/* MERGE */
+.merge-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+.m-opt {
+  border:2px solid var(--border); border-radius:var(--r);
+  background:var(--white); padding:22px 10px;
+  text-align:center; cursor:pointer; transition:all .25s;
+}
+.m-opt:hover { border-color:var(--rose); box-shadow:var(--shadow); }
+.m-opt.on { border-color:var(--rose-deep); background:var(--rose-pale); }
+.m-opt svg { margin-bottom:10px; }
+.m-title { font-size:.8rem; font-weight:500; color:var(--ink); }
+.m-sub { font-size:.68rem; color:var(--ink-soft); margin-top:2px; }
+
+/* SETTINGS */
+.settings-box { background:var(--white); border:1px solid var(--border); border-radius:var(--r); padding:16px 20px; margin-bottom:16px; }
+.wm-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.wm-row:last-child { margin-bottom:0; }
+.wm-row label { font-size:.75rem; color:var(--ink); width:72px; flex-shrink:0; }
+select, input[type=text] {
+  flex:1; padding:8px 12px; border:1.5px solid var(--border); border-radius:var(--r-sm);
+  font-family:'Jost',sans-serif; font-size:.8rem; color:var(--ink);
+  background:var(--cream); outline:none; transition:border-color .2s;
+}
+select:focus, input[type=text]:focus { border-color:var(--rose); }
+
+/* RESULT */
+.result-box { display:none; margin-top:20px; }
+.result-canvas-wrap { border-radius:var(--r); overflow:hidden; border:1px solid var(--border); background:#f8eef2; box-shadow:var(--shadow); }
+.result-canvas-wrap canvas { width:100%; display:block; }
+
+/* BUTTONS */
+.btn {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  width:100%; padding:13px 20px; border-radius:var(--r-sm);
+  border:none; font-family:'Jost',sans-serif; font-size:.88rem;
+  font-weight:400; cursor:pointer; transition:all .25s; margin-top:12px; letter-spacing:.03em;
+}
+.btn-primary { background:var(--rose-deep); color:#fff; }
+.btn-primary:hover { background:#a04d6a; transform:translateY(-1px); box-shadow:0 6px 20px rgba(184,92,122,.3); }
+.btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
+.btn-ghost { background:var(--white); color:var(--rose-deep); border:1.5px solid var(--rose-mid); }
+.btn-ghost:hover { background:var(--rose-pale); border-color:var(--rose); }
+
+.divider { height:1px; background:var(--border); margin:16px 0; }
+
+/* TOAST */
+.toast {
+  position:fixed; bottom:28px; left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background:var(--ink); color:#fff;
+  padding:10px 22px; border-radius:100px;
+  font-size:.8rem; font-weight:300; z-index:999;
+  transition:transform .35s cubic-bezier(.22,1,.36,1);
+  white-space:nowrap; letter-spacing:.03em;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+#workCanvas { display:none; }
+
+@media (max-width:480px) {
+  .p-label { display:none; }
+  .p-step { padding:5px 8px; }
+  .panel-head h2 { font-size:1.6rem; }
+  header { padding:11px 14px; }
+  .header-copy h1 { font-size:.88rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+    <circle cx="20" cy="20" r="20" fill="#fff0f5"/>
+    <path d="M20 6.5C15.8 6.5 12.5 9.5 12.5 13.2C12.5 15.6 13.5 17.5 14 19.3C14.5 21.1 14.4 23.6 14 28.2C13.6 31 14.9 33 16.6 33C18.2 33 18.7 31.2 19.2 28.6C19.6 26.5 20 26 20 26C20 26 20.4 26.5 20.8 28.6C21.3 31.2 21.8 33 23.4 33C25.1 33 26.4 31 26 28.2C25.6 23.6 25.5 21.1 26 19.3C26.5 17.5 27.5 15.6 27.5 13.2C27.5 9.5 24.2 6.5 20 6.5Z" fill="#d4849f" stroke="#b85c7a" stroke-width="1.2"/>
+    <ellipse cx="17.5" cy="12" rx="1.4" ry="1.8" fill="white" opacity="0.55"/>
+  </svg>
+  <div class="header-copy">
+    <h1>Cabinet Dentaire Maryam Chikhaoui</h1>
+    <p>Studio avant / après — Val Fleuri, Casablanca</p>
+  </div>
+</header>
+
+<nav class="progress">
+  <div class="p-step active" id="nav1" onclick="goStep(1)">
+    <div class="p-dot">1</div>
+    <span class="p-label">Photo Avant</span>
+  </div>
+  <span class="p-arrow">›</span>
+  <div class="p-step" id="nav2" onclick="goStep(2)">
+    <div class="p-dot">2</div>
+    <span class="p-label">Photo Après</span>
+  </div>
+  <span class="p-arrow">›</span>
+  <div class="p-step" id="nav3" onclick="goStep(3)">
+    <div class="p-dot">3</div>
+    <span class="p-label">Fusion</span>
+  </div>
+</nav>
+
+<canvas id="workCanvas"></canvas>
+
+<main>
+
+<!-- STEP 1 -->
+<div class="panel active" id="panel1">
+  <div class="panel-head">
+    <h2>Photo <em>Avant</em></h2>
+    <p>Importez la photo avant le soin</p>
+  </div>
+  <div class="upload-zone" id="zone1" ondragover="onDrag(event,'zone1')" ondragleave="offDrag('zone1')" ondrop="onDrop(event,1)">
+    <input type="file" accept="image/*" id="file1" onchange="loadImage(1)">
+    <div class="upload-icon">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="22" fill="#fff0f5"/><path d="M22 14v10M16 20l6-6 6 6" stroke="#b85c7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 30h18" stroke="#d4849f" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+    <strong>Appuyer pour choisir</strong>
+    <p>ou glisser-déposer</p>
+  </div>
+  <div class="img-wrap" id="prev1">
+    <img id="img1-disp" src="" alt="Avant">
+    <div class="img-actions">
+      <div class="icon-btn" onclick="clearImg(1)">✕</div>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="btn1" onclick="goStep(2)" disabled>Suivant — Photo Après &nbsp;›</button>
+</div>
+
+<!-- STEP 2 -->
+<div class="panel" id="panel2">
+  <div class="panel-head">
+    <h2>Photo <em>Après</em></h2>
+    <p>Importez puis retouchez la photo après le soin</p>
+  </div>
+  <div class="upload-zone" id="zone2" ondragover="onDrag(event,'zone2')" ondragleave="offDrag('zone2')" ondrop="onDrop(event,2)">
+    <input type="file" accept="image/*" id="file2" onchange="loadImage(2)">
+    <div class="upload-icon">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="22" fill="#fff0f5"/><path d="M22 14v10M16 20l6-6 6 6" stroke="#b85c7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 30h18" stroke="#d4849f" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+    <strong>Appuyer pour choisir</strong>
+    <p>ou glisser-déposer</p>
+  </div>
+  <div class="img-wrap" id="prev2">
+    <canvas id="editCanvas"></canvas>
+    <div class="img-actions">
+      <div class="icon-btn" onclick="resetEdits()">↺</div>
+      <div class="icon-btn" onclick="clearImg(2)">✕</div>
+    </div>
+  </div>
+  <div class="tool-bar" id="toolBar">
+    <div class="tool-section">
+      <div class="tl">Luminosité &amp; Contraste</div>
+      <div class="sl-row"><label>Luminosité</label><input type="range" id="s-br" min="-100" max="100" value="0" oninput="applyEdits()"><span class="sl-val" id="v-br">0</span></div>
+      <div class="sl-row"><label>Contraste</label><input type="range" id="s-co" min="-100" max="100" value="0" oninput="applyEdits()"><span class="sl-val" id="v-co">0</span></div>
+      <div class="sl-row"><label>Saturation</label><input type="range" id="s-sa" min="-100" max="100" value="0" oninput="applyEdits()"><span class="sl-val" id="v-sa">0</span></div>
+    </div>
+    <div class="tool-section">
+      <div class="tl">Filtres</div>
+      <div class="filter-grid">
+        <button class="f-btn on" data-f="none"    onclick="setFilter(this,'none')">Aucun</button>
+        <button class="f-btn"    data-f="warm"    onclick="setFilter(this,'warm')">Chaud ☀️</button>
+        <button class="f-btn"    data-f="cool"    onclick="setFilter(this,'cool')">Froid ❄️</button>
+        <button class="f-btn"    data-f="bright"  onclick="setFilter(this,'bright')">Éclat ✨</button>
+        <button class="f-btn"    data-f="natural" onclick="setFilter(this,'natural')">Naturel 🌿</button>
+        <button class="f-btn"    data-f="bw"      onclick="setFilter(this,'bw')">N&amp;B</button>
+        <button class="f-btn"    data-f="rose"    onclick="setFilter(this,'rose')">Rosé 🌸</button>
+        <button class="f-btn"    data-f="vivid"   onclick="setFilter(this,'vivid')">Vivid 🔥</button>
+      </div>
+    </div>
+    <div class="tool-section">
+      <div class="tl">Recadrage</div>
+      <div class="sl-row"><label>Zoom</label><input type="range" id="s-zm" min="50" max="200" value="100" oninput="applyEdits()"><span class="sl-val" id="v-zm">100%</span></div>
+      <div class="sl-row"><label>Décal. X</label><input type="range" id="s-px" min="-200" max="200" value="0" oninput="applyEdits()"><span class="sl-val" id="v-px">0</span></div>
+      <div class="sl-row"><label>Décal. Y</label><input type="range" id="s-py" min="-200" max="200" value="0" oninput="applyEdits()"><span class="sl-val" id="v-py">0</span></div>
+    </div>
+  </div>
+  <button class="btn btn-ghost" onclick="goStep(1)" style="margin-top:14px">‹ Retour</button>
+  <button class="btn btn-primary" id="btn2" onclick="goStep(3)" disabled>Suivant — Fusion &nbsp;›</button>
+</div>
+
+<!-- STEP 3 -->
+<div class="panel" id="panel3">
+  <div class="panel-head">
+    <h2><em>Fusion</em> des photos</h2>
+    <p>Choisissez la disposition pour Instagram 1080 × 1080</p>
+  </div>
+
+  <div class="merge-grid">
+    <div class="m-opt on" id="opt-side" onclick="selectLayout('side')">
+      <svg width="64" height="44" viewBox="0 0 64 44">
+        <rect x="1" y="1" width="29" height="42" rx="5" fill="#f5d5e1" stroke="#b85c7a" stroke-width="1.5"/>
+        <rect x="34" y="1" width="29" height="42" rx="5" fill="#d4849f" stroke="#b85c7a" stroke-width="1.5"/>
+        <text x="15.5" y="26" text-anchor="middle" font-size="9" fill="#b85c7a" font-family="sans-serif" font-weight="600">AV</text>
+        <text x="48.5" y="26" text-anchor="middle" font-size="9" fill="#fff" font-family="sans-serif" font-weight="600">AP</text>
+      </svg>
+      <div class="m-title">Côte à côte</div>
+      <div class="m-sub">Avant ← → Après</div>
+    </div>
+    <div class="m-opt" id="opt-top" onclick="selectLayout('top')">
+      <svg width="44" height="64" viewBox="0 0 44 64">
+        <rect x="1" y="1" width="42" height="29" rx="5" fill="#f5d5e1" stroke="#b85c7a" stroke-width="1.5"/>
+        <rect x="1" y="34" width="42" height="29" rx="5" fill="#d4849f" stroke="#b85c7a" stroke-width="1.5"/>
+        <text x="22" y="20" text-anchor="middle" font-size="9" fill="#b85c7a" font-family="sans-serif" font-weight="600">AV</text>
+        <text x="22" y="53" text-anchor="middle" font-size="9" fill="#fff" font-family="sans-serif" font-weight="600">AP</text>
+      </svg>
+      <div class="m-title">Haut / Bas</div>
+      <div class="m-sub">Avant ↑ ↓ Après</div>
+    </div>
+  </div>
+
+  <div class="settings-box">
+    <div class="tl" style="margin-bottom:12px">Labels &amp; Séparateur</div>
+    <div class="wm-row">
+      <label>Label Avant</label>
+      <input type="text" id="lbl-b" value="AVANT" maxlength="20">
+    </div>
+    <div class="wm-row">
+      <label>Label Après</label>
+      <input type="text" id="lbl-a" value="APRÈS" maxlength="20">
+    </div>
+    <div class="wm-row">
+      <label>Séparateur</label>
+      <select id="sep">
+        <option value="line">Ligne rose</option>
+        <option value="gap">Espace blanc</option>
+        <option value="none">Aucun</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="generate()">✦ &nbsp;Générer la photo Instagram</button>
+
+  <div class="result-box" id="resultBox">
+    <div class="divider"></div>
+    <div class="result-canvas-wrap">
+      <canvas id="finalCanvas"></canvas>
+    </div>
+    <button class="btn btn-ghost" onclick="download()" style="margin-top:14px">↓ &nbsp;Télécharger (1080 × 1080 px)</button>
+  </div>
+
+  <button class="btn btn-ghost" onclick="goStep(2)" style="margin-top:10px">‹ Retour</button>
+</div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// STATE
+let imgs = {1:null, 2:null};
+let curFilter = 'none';
+let curLayout = 'side';
+const ec = document.getElementById('editCanvas');
+const ectx = ec.getContext('2d');
+
+// NAV
+function goStep(n){
+  [1,2,3].forEach(i=>{
+    document.getElementById('panel'+i).classList.toggle('active',i===n);
+    const nav=document.getElementById('nav'+i);
+    nav.classList.toggle('active',i===n);
+    nav.classList.toggle('done',i<n);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// DRAG
+function onDrag(e,id){ e.preventDefault(); document.getElementById(id).classList.add('drag'); }
+function offDrag(id){ document.getElementById(id).classList.remove('drag'); }
+function onDrop(e,n){ e.preventDefault(); offDrag('zone'+n); const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')) processFile(n,f); }
+
+// LOAD
+function loadImage(n){ const f=document.getElementById('file'+n).files[0]; if(f) processFile(n,f); }
+function processFile(n,file){
+  const r=new FileReader();
+  r.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      imgs[n]=img;
+      if(n===1){
+        document.getElementById('img1-disp').src=e.target.result;
+        document.getElementById('prev1').style.display='block';
+        document.getElementById('zone1').style.display='none';
+        document.getElementById('btn1').disabled=false;
+      } else {
+        ec.width=img.width; ec.height=img.height;
+        ectx.drawImage(img,0,0);
+        document.getElementById('prev2').style.display='block';
+        document.getElementById('zone2').style.display='none';
+        document.getElementById('toolBar').classList.add('on');
+        document.getElementById('btn2').disabled=false;
+        resetEdits();
+      }
+    };
+    img.src=e.target.result;
+  };
+  r.readAsDataURL(file);
+}
+
+function clearImg(n){
+  imgs[n]=null;
+  if(n===1){
+    document.getElementById('prev1').style.display='none';
+    document.getElementById('zone1').style.display='block';
+    document.getElementById('btn1').disabled=true;
+    document.getElementById('file1').value='';
+  } else {
+    document.getElementById('prev2').style.display='none';
+    document.getElementById('zone2').style.display='block';
+    document.getElementById('toolBar').classList.remove('on');
+    document.getElementById('btn2').disabled=true;
+    document.getElementById('file2').value='';
+    curFilter='none';
+    document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('on'));
+    document.querySelector('[data-f="none"]').classList.add('on');
+  }
+}
+
+// EDITS
+function resetEdits(){
+  ['s-br','s-co','s-sa','s-px','s-py'].forEach(id=>document.getElementById(id).value=0);
+  document.getElementById('s-zm').value=100;
+  curFilter='none';
+  document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelector('[data-f="none"]').classList.add('on');
+  applyEdits();
+}
+
+function setFilter(btn,f){
+  document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); curFilter=f; applyEdits();
+}
+
+function applyEdits(){
+  if(!imgs[2]) return;
+  const img=imgs[2];
+  const br=+document.getElementById('s-br').value;
+  const co=+document.getElementById('s-co').value;
+  const sa=+document.getElementById('s-sa').value;
+  const zm=+document.getElementById('s-zm').value/100;
+  const px=+document.getElementById('s-px').value;
+  const py=+document.getElementById('s-py').value;
+
+  document.getElementById('v-br').textContent=br>0?'+'+br:br;
+  document.getElementById('v-co').textContent=co>0?'+'+co:co;
+  document.getElementById('v-sa').textContent=sa>0?'+'+sa:sa;
+  document.getElementById('v-zm').textContent=Math.round(zm*100)+'%';
+  document.getElementById('v-px').textContent=px;
+  document.getElementById('v-py').textContent=py;
+
+  ec.width=img.width; ec.height=img.height;
+  ectx.save();
+  ectx.translate(ec.width/2+px, ec.height/2+py);
+  ectx.scale(zm,zm);
+  ectx.drawImage(img,-img.width/2,-img.height/2);
+  ectx.restore();
+  pixelEdits(ectx,ec,br,co,sa);
+  filterEdits(ectx,ec,curFilter);
+}
+
+function pixelEdits(ctx,c,br,co,sa){
+  const id=ctx.getImageData(0,0,c.width,c.height), d=id.data;
+  const bv=br*2.55;
+  const cv=co/100*127;
+  const cf=(259*(cv+255))/(255*(259-cv));
+  const sv=1+sa/100;
+  for(let i=0;i<d.length;i+=4){
+    let r=d[i],g=d[i+1],b=d[i+2];
+    r+=bv; g+=bv; b+=bv;
+    r=cf*(r-128)+128; g=cf*(g-128)+128; b=cf*(b-128)+128;
+    const gr=.299*r+.587*g+.114*b;
+    r=gr+sv*(r-gr); g=gr+sv*(g-gr); b=gr+sv*(b-gr);
+    d[i]=cl(r); d[i+1]=cl(g); d[i+2]=cl(b);
+  }
+  ctx.putImageData(id,0,0);
+}
+
+function filterEdits(ctx,c,f){
+  if(f==='none') return;
+  const id=ctx.getImageData(0,0,c.width,c.height), d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    let r=d[i],g=d[i+1],b=d[i+2];
+    if(f==='warm')   { r=cl(r+20); g=cl(g+8); b=cl(b-15); }
+    if(f==='cool')   { r=cl(r-15); b=cl(b+20); }
+    if(f==='bright') { r=cl(r*1.1+10); g=cl(g*1.1+10); b=cl(b*1.1+10); }
+    if(f==='natural'){ r=cl(r*.95+5); g=cl(g*1.05); b=cl(b*.9); }
+    if(f==='bw')     { const gr=.299*r+.587*g+.114*b; r=g=b=gr; }
+    if(f==='rose')   { r=cl(r+25); g=cl(g-5); b=cl(b+10); }
+    if(f==='vivid')  { const gr=.299*r+.587*g+.114*b; r=cl(gr+1.4*(r-gr)); g=cl(gr+1.4*(g-gr)); b=cl(gr+1.4*(b-gr)); }
+    d[i]=r; d[i+1]=g; d[i+2]=b;
+  }
+  ctx.putImageData(id,0,0);
+}
+
+function cl(v){ return Math.max(0,Math.min(255,v)); }
+
+// LAYOUT
+function selectLayout(l){
+  curLayout=l;
+  document.getElementById('opt-side').classList.toggle('on',l==='side');
+  document.getElementById('opt-top').classList.toggle('on',l==='top');
+}
+
+// GENERATE
+function generate(){
+  if(!imgs[1]||!imgs[2]){ showToast('⚠️ Importez les deux photos'); return; }
+  const S=1080, SEP=6;
+  const fc=document.getElementById('finalCanvas');
+  const fctx=fc.getContext('2d');
+  fc.width=S; fc.height=S;
+
+  const sepStyle=document.getElementById('sep').value;
+  const sepPx=sepStyle==='none'?0:SEP;
+
+  fctx.fillStyle='#ffffff';
+  fctx.fillRect(0,0,S,S);
+
+  const lblB=(document.getElementById('lbl-b').value||'AVANT').toUpperCase();
+  const lblA=(document.getElementById('lbl-a').value||'APRÈS').toUpperCase();
+
+  if(curLayout==='side'){
+    const half=Math.floor((S-sepPx)/2);
+    // draw images
+    drawFit(fctx, imgs[1],         0, 0, half, S);
+    drawFit(fctx, ec,      half+sepPx, 0, half, S);
+    // separator
+    if(sepStyle!=='none'){
+      fctx.fillStyle=sepStyle==='line'?'#d4849f':'#ffffff';
+      fctx.fillRect(half,0,sepPx,S);
+    }
+    // labels — centred horizontally within each half, fixed at bottom
+    drawLabel(fctx, lblB, 0,    half, S);
+    drawLabel(fctx, lblA, half+sepPx, half, S);
+  } else {
+    const half=Math.floor((S-sepPx)/2);
+    drawFit(fctx, imgs[1], 0,            0, S, half);
+    drawFit(fctx, ec,      0, half+sepPx, S, half);
+    if(sepStyle!=='none'){
+      fctx.fillStyle=sepStyle==='line'?'#d4849f':'#ffffff';
+      fctx.fillRect(0,half,S,sepPx);
+    }
+    // labels — centred horizontally within full width, bottom of each half
+    drawLabelH(fctx, lblB, 0,            S, half);
+    drawLabelH(fctx, lblA, half+sepPx,   S, half);
+  }
+
+  document.getElementById('resultBox').style.display='block';
+  showToast('✦ Photo générée !');
+  setTimeout(()=>document.getElementById('resultBox').scrollIntoView({behavior:'smooth',block:'nearest'}),120);
+}
+
+// Draw image cover-fit into rect [x,y,w,h]
+function drawFit(ctx,src,x,y,w,h){
+  const sw=src.width||src.naturalWidth||w;
+  const sh=src.height||src.naturalHeight||h;
+  const scale=Math.max(w/sw,h/sh);
+  const dw=sw*scale, dh=sh*scale;
+  const dx=x+(w-dw)/2, dy=y+(h-dh)/2;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
+  ctx.drawImage(src,dx,dy,dw,dh);
+  ctx.restore();
+}
+
+// Label for side-by-side layout: centred in half-width column
+// sectionX = left edge of the section, halfW = width of one section
+function drawLabel(ctx, text, sectionX, halfW, totalH){
+  const fs=38, padX=22, padY=12;
+  ctx.font=`700 ${fs}px Arial, sans-serif`;
+  const tw=ctx.measureText(text).width;
+  const pillW=tw+padX*2;
+  const pillH=fs+padY*2;
+
+  // Horizontally centred within this section
+  const px=sectionX+(halfW-pillW)/2;
+  // 24px from the bottom of the whole canvas
+  const py=totalH-pillH-24;
+
+  ctx.save();
+  ctx.globalAlpha=0.86;
+  ctx.fillStyle='#b85c7a';
+  rrect(ctx,px,py,pillW,pillH,10);
+  ctx.fill();
+  ctx.globalAlpha=1;
+  ctx.fillStyle='#ffffff';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillText(text, px+pillW/2, py+pillH/2);
+  ctx.restore();
+}
+
+// Label for top/bottom layout: centred in full width, bottom of section
+function drawLabelH(ctx, text, sectionY, totalW, sectionH){
+  const fs=38, padX=22, padY=12;
+  ctx.font=`700 ${fs}px Arial, sans-serif`;
+  const tw=ctx.measureText(text).width;
+  const pillW=tw+padX*2;
+  const pillH=fs+padY*2;
+
+  // Horizontally centred in full width
+  const px=(totalW-pillW)/2;
+  // 24px from bottom of section
+  const py=sectionY+sectionH-pillH-24;
+
+  ctx.save();
+  ctx.globalAlpha=0.86;
+  ctx.fillStyle='#b85c7a';
+  rrect(ctx,px,py,pillW,pillH,10);
+  ctx.fill();
+  ctx.globalAlpha=1;
+  ctx.fillStyle='#ffffff';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillText(text, px+pillW/2, py+pillH/2);
+  ctx.restore();
+}
+
+function rrect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+// DOWNLOAD
+function download(){
+  const a=document.createElement('a');
+  a.download='avant-apres-chikhaoui.png';
+  a.href=document.getElementById('finalCanvas').toDataURL('image/png');
+  a.click();
+  showToast('✓ Téléchargé !');
+}
+
+// TOAST
+function showToast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
